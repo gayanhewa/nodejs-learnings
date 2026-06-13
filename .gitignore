@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Deno
+# (deno.lock IS committed — it pins the test-runner deps)
+
+# Jupyter kernel checkpoints, if any tooling writes them
+.ipynb_checkpoints

@@ -1,0 +1,24 @@
+{
+  "//": "Single-runtime Deno project. Notebooks are // %% cell-scripts run in Zed's REPL; exercises use Deno's built-in test runner.",
+  "tasks": {
+    "test": "deno test -A exercises/",
+    "cells:build": "deno run -A .tools/build-zed-cells.ts",
+    "cells:verify": "deno run -A .tools/verify-cells.ts"
+  },
+  "imports": {
+    "@std/testing/": "jsr:/@std/testing@^1/",
+    "@std/expect": "jsr:@std/expect@^1"
+  },
+  "//lint": "Skip generated notebooks and exercises.ts (unimplemented stubs). Disable three rules that conflict with deliberate teaching style: async fns kept async for signature uniformity (require-await), any[] listener args matching Node's EventEmitter (no-explicit-any).",
+  "lint": {
+    "include": [".tools/", "exercises/"],
+    "exclude": ["exercises/exercises.ts"],
+    "rules": {
+      "exclude": ["require-await", "no-explicit-any"]
+    }
+  },
+  "fmt": {
+    "include": [".tools/", "exercises/"],
+    "exclude": ["exercises/exercises.ts"]
+  }
+}

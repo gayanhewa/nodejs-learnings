@@ -1,0 +1,24 @@
+{
+  // Use the Deno language server + formatter for this project.
+  "lsp": {
+    "deno": {
+      "settings": {
+        "deno": { "enable": true }
+      }
+    }
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["deno", "!typescript-language-server", "!vtsls", "!eslint"],
+      "formatter": "language_server"
+    }
+  },
+
+  // REPL: run cells (separated by `// %%`) with ctrl-shift-enter.
+  // Force the Deno kernel for TypeScript so output renders inline.
+  "jupyter": {
+    "kernel_selections": {
+      "typescript": "deno"
+    }
+  }
+}
