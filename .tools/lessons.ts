@@ -430,12 +430,41 @@ await mapLimit([1, 2, 3, 4, 5], 2, (n) => delay(30, n * 10));
   md`
 ## True parallelism — Web Workers / worker threads
 
-Promises give concurrent **I/O** on one thread; they do **not** help CPU-bound work, which blocks the thread. For heavy compute use real worker threads.
+Promises give concurrent **I/O** on one thread; they do **not** help CPU-bound work, which blocks the thread. To see why this matters, run the SAME heavy compute two ways and compare.
 
-Deno uses the standard **Web Worker** API. Below we offload a CPU-heavy loop so the main thread stays free. *(This cell writes a temp worker file, runs it, then cleans up.)*
+### Version 1: inline (blocks the main thread)
+
+We run the heavy loop three times directly on the main thread. To make the blocking *visible*, we also start a timer that ticks every 10ms. While the compute runs, the event loop is stuck, so the timer **cannot fire** — its ticks are starved until the compute finishes.
 `,
   code`
-// Heavy compute that would freeze the main thread if run inline.
+function heavy(n: number) {
+  let sum = 0;
+  for (let i = 0; i < n; i++) sum += Math.sqrt(i) * Math.sin(i);
+  return sum;
+}
+
+// A probe: this SHOULD tick every 10ms. Count how many times it does.
+let ticks = 0;
+const probe = setInterval(() => ticks++, 10);
+
+const t0 = performance.now();
+const results = [heavy(2e7), heavy(2e7), heavy(2e7)]; // all on the main thread
+const elapsed = Math.round(performance.now() - t0);
+
+clearInterval(probe);
+// ticks is ~0: the 10ms timer was starved the whole time the loop ran,
+// because synchronous CPU work blocks the single thread.
+\`inline: ~\${elapsed}ms, results \${results.length}, timer ticked \${ticks}x while blocked\`;
+`,
+  md`
+### Version 2: offloaded to Web Workers (main thread stays free)
+
+Same compute, same probe — but each call runs in its own **Worker** thread. Now the main thread is idle while the workers crunch, so the 10ms timer **keeps ticking**. The three computations also run truly in parallel on separate threads, so total time is closer to one computation, not three.
+
+Deno uses the standard **Web Worker** API. *(This cell builds the worker from an in-memory blob, runs it, then cleans up.)*
+`,
+  code`
+// Same heavy loop, but as a worker that messages its result back.
 const workerSrc = \`
   self.onmessage = (e) => {
     let sum = 0;
@@ -453,11 +482,24 @@ function runWorker(n: number): Promise<number> {
   });
 }
 
-// Three heavy computations IN PARALLEL on separate threads.
+// Same probe as the inline version.
+let ticks = 0;
+const probe = setInterval(() => ticks++, 10);
+
 const t0 = performance.now();
 const results = await Promise.all([runWorker(2e7), runWorker(2e7), runWorker(2e7)]);
+const elapsed = Math.round(performance.now() - t0);
+
+clearInterval(probe);
 URL.revokeObjectURL(url);
-\`3 workers done in ~\${Math.round(performance.now() - t0)}ms; results length \${results.length}\`;
+// ticks is well above 0 AND elapsed is roughly ONE computation's time,
+// not three: the main thread stayed free and the work ran in parallel.
+\`workers: ~\${elapsed}ms, results \${results.length}, timer ticked \${ticks}x while working\`;
+`,
+  md`
+**Read the two outputs side by side.** Inline: the timer ticked ~0 times (event loop frozen) and time is the sum of all three loops. Workers: the timer kept ticking (main thread free) and time is close to a single loop (parallel). That gap is the entire reason worker threads exist.
+
+> Workers have real startup and message-passing cost, so they only pay off for genuinely heavy CPU work. For light tasks the overhead is larger than the savings. For many small tasks, reuse a **pool** of workers instead of spawning one per task.
 `,
   md`
 ## Production patterns: timeout & retry
