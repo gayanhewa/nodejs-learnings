@@ -81,3 +81,30 @@ import type { EventEmitter } from "node:events";
 export function eventToPromise<T = unknown>(emitter: EventEmitter, eventName: string): Promise<T> {
   throw new Error("not implemented: eventToPromise");
 }
+
+// ---- EX 9: collect (Streams) -----------------------------
+// Drain a ReadableStream and return every chunk as an array, in
+// order. Hint: `for await (const chunk of stream)`. See
+// notebooks/4-streams.ts (consuming a ReadableStream).
+export async function collect<T>(stream: ReadableStream<T>): Promise<T[]> {
+  throw new Error("not implemented: collect");
+}
+
+// ---- EX 10: mapStream (Streams) --------------------------
+// Build a TransformStream that applies `fn` to each chunk. Used
+// like: source.pipeThrough(mapStream(fn)). Hint: the transform()
+// callback gets (chunk, controller); call controller.enqueue(...).
+// See notebooks/4-streams.ts (TransformStream, pipeThrough).
+export function mapStream<I, O>(fn: (chunk: I) => O): TransformStream<I, O> {
+  throw new Error("not implemented: mapStream");
+}
+
+// ---- EX 11: take (Streams) -------------------------------
+// Return a ReadableStream that yields only the first `n` chunks of
+// `stream`, then closes (and stops pulling from the source). Hint:
+// read with a reader, count, and controller.close() after n. Be
+// sure to release/cancel the source reader when you stop early.
+// See notebooks/4-streams.ts (getReader, early termination).
+export function take<T>(stream: ReadableStream<T>, n: number): ReadableStream<T> {
+  throw new Error("not implemented: take");
+}

@@ -60,13 +60,13 @@ You can also edit the `notebooks/*.ts` directly, but a rebuild overwrites them.
 
 ## The exercises
 
-Implement the 8 stubs in `exercises/exercises.ts`, then:
+Implement the 11 stubs in `exercises/exercises.ts`, then:
 
 ```bash
 deno task test           # or: deno test -A exercises/
 ```
 
-`promisify`, `mapSeries`, `mapParallel`, `mapLimit`, `withTimeout`, `retry`, `EventBus`, `eventToPromise`. Each maps to a concept from the lessons.
+`promisify`, `mapSeries`, `mapParallel`, `mapLimit`, `withTimeout`, `retry`, `EventBus`, `eventToPromise`, `collect`, `mapStream`, `take`. Each maps to a concept from the lessons.
 
 Reference answers are in `exercises/solutions.ts`. To check they pass, temporarily change the import at the top of `exercises/exercises.test.ts` from `./exercises.ts` to `./solutions.ts`.
 

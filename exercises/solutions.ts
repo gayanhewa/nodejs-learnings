@@ -106,3 +106,50 @@ export function eventToPromise<T = unknown>(
     emitter.once(eventName, (first: T) => resolve(first))
   );
 }
+
+export async function collect<T>(stream: ReadableStream<T>): Promise<T[]> {
+  const out: T[] = [];
+  // for await over a ReadableStream drains it chunk by chunk and
+  // releases the lock automatically when the stream closes.
+  for await (const chunk of stream) out.push(chunk);
+  return out;
+}
+
+export function mapStream<I, O>(fn: (chunk: I) => O): TransformStream<I, O> {
+  return new TransformStream<I, O>({
+    transform(chunk, controller) {
+      controller.enqueue(fn(chunk)); // one in, one out
+    },
+  });
+}
+
+export function take<T>(
+  stream: ReadableStream<T>,
+  n: number,
+): ReadableStream<T> {
+  const reader = stream.getReader();
+  let taken = 0;
+  return new ReadableStream<T>({
+    async pull(controller) {
+      if (taken >= n) {
+        controller.close();
+        await reader.cancel(); // stop pulling from the source
+        return;
+      }
+      const { value, done } = await reader.read();
+      if (done) {
+        controller.close();
+        return;
+      }
+      taken++;
+      controller.enqueue(value);
+      if (taken >= n) {
+        controller.close();
+        await reader.cancel();
+      }
+    },
+    async cancel() {
+      await reader.cancel(); // propagate downstream cancellation upstream
+    },
+  });
+}

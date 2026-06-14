@@ -8,15 +8,27 @@ import { expect } from "@std/expect";
 import { EventEmitter } from "node:events";
 
 import {
+  collect,
   EventBus,
   eventToPromise,
   mapLimit,
   mapParallel,
   mapSeries,
+  mapStream,
   promisify,
   retry,
+  take,
   withTimeout,
 } from "./exercises.ts";
+
+// Build a ReadableStream from an array, one chunk per item.
+const streamOf = <T>(items: T[]): ReadableStream<T> =>
+  new ReadableStream<T>({
+    start(controller) {
+      for (const item of items) controller.enqueue(item);
+      controller.close();
+    },
+  });
 
 const delay = <T>(ms: number, v?: T) =>
   new Promise<T>((r) => setTimeout(() => r(v as T), ms));
@@ -143,5 +155,47 @@ describe("EX8 eventToPromise", () => {
     const ee = new EventEmitter();
     setTimeout(() => ee.emit("ready", "payload"), 20);
     expect(await eventToPromise<string>(ee, "ready")).toBe("payload");
+  });
+});
+
+describe("EX9 collect", () => {
+  test("drains every chunk in order", async () => {
+    const out = await collect(streamOf([1, 2, 3]));
+    expect(out).toEqual([1, 2, 3]);
+  });
+  test("empty stream gives empty array", async () => {
+    expect(await collect(streamOf<number>([]))).toEqual([]);
+  });
+});
+
+describe("EX10 mapStream", () => {
+  test("transforms each chunk via pipeThrough", async () => {
+    const out = await collect(
+      streamOf([1, 2, 3]).pipeThrough(mapStream((n: number) => n * 10)),
+    );
+    expect(out).toEqual([10, 20, 30]);
+  });
+});
+
+describe("EX11 take", () => {
+  test("yields only the first n chunks", async () => {
+    const out = await collect(take(streamOf([1, 2, 3, 4, 5]), 2));
+    expect(out).toEqual([1, 2]);
+  });
+  test("stops pulling from the source after n", async () => {
+    // A source that counts how many chunks were actually pulled.
+    let pulled = 0;
+    const counting = new ReadableStream<number>({
+      pull(controller) {
+        pulled++;
+        controller.enqueue(pulled);
+        if (pulled >= 100) controller.close();
+      },
+    });
+    const out = await collect(take(counting, 3));
+    expect(out).toEqual([1, 2, 3]);
+    // take(3) must not drain all 100; a few extra pulls are tolerable
+    // due to internal queueing, but it must be far below 100.
+    expect(pulled).toBeLessThan(10);
   });
 });
