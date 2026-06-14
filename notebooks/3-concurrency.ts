@@ -183,7 +183,11 @@ async function retry<T>(fn: (attempt: number) => Promise<T>, attempts = 3, base 
 
 const timedOut = await withTimeout(delay(200, "slow"), 50).catch((e) => e.message);
 let calls = 0;
-const recovered = await retry((i) => i < 2 ? Promise.reject(new Error("flaky")) : Promise.resolve("ok@" + i), 5);
+const recovered = await retry((i) => {
+  calls++; // count invocations so the output shows the retry actually happened
+  return i < 2 ? Promise.reject(new Error("flaky")) : Promise.resolve("ok@" + i);
+}, 5);
+// calls === 3: failed at i=0 and i=1, succeeded at i=2.
 ({ timedOut, recovered, calls });
 
 // %%
