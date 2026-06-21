@@ -6,3 +6,10 @@
 
 # Jupyter kernel checkpoints, if any tooling writes them
 .ipynb_checkpoints
+
+# PDF build intermediates (the .pdf itself IS committed as the deliverable)
+dist/*.md
+dist/*.html
+
+# Local editor artifacts
+.zed/debug.json

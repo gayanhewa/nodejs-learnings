@@ -3,7 +3,8 @@
   "tasks": {
     "test": "deno test -A exercises/",
     "cells:build": "deno run -A .tools/build-zed-cells.ts",
-    "cells:verify": "deno run -A .tools/verify-cells.ts"
+    "cells:verify": "deno run -A .tools/verify-cells.ts",
+    "pdf": "deno run -A .tools/build-pdf.ts"
   },
   "imports": {
     "@std/testing/": "jsr:/@std/testing@^1/",

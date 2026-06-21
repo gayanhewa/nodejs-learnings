@@ -108,6 +108,14 @@ deno.json         tasks (test, cells:build, cells:verify) + imports
 deno task test           # run the exercise tests
 deno task cells:build    # regenerate lesson .ts files from lessons.ts
 deno task cells:verify   # verify every lesson cell runs clean
+deno task pdf            # build a single PDF of all lessons (dist/nodejs-async-lessons.pdf)
 deno fmt                 # format
 deno lint                # lint
 ```
+
+## Read offline (PDF)
+
+All four lessons, with their runnable examples, are bundled into one PDF for reading on the go:
+
+- Prebuilt: [`dist/nodejs-async-lessons.pdf`](dist/nodejs-async-lessons.pdf)
+- Rebuild it: `deno task pdf` (needs `pandoc` and Google Chrome installed; the script converts the notebook cells to Markdown, then to syntax-highlighted HTML, then prints to PDF).

@@ -1,0 +1,119 @@
+/* Print stylesheet for the lessons PDF. Optimized for reading on a
+   phone/tablet/laptop: comfortable measure, clear code blocks. */
+
+@page {
+  margin: 18mm 16mm;
+}
+
+html {
+  font-size: 11pt;
+}
+
+body {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  max-width: none;
+  margin: 0;
+}
+
+/* Title block (from the YAML front matter) */
+header#title-block-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #ddd;
+}
+header#title-block-header h1.title {
+  font-size: 2.2rem;
+  margin-bottom: 0.3rem;
+}
+header#title-block-header p.subtitle {
+  font-size: 1.1rem;
+  color: #555;
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 1.7rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+  margin-top: 1.6rem;
+  /* each lesson h1 starts a fresh page */
+  page-break-before: always;
+}
+/* the first h1 should not force a leading blank page */
+header#title-block-header + h1 {
+  page-break-before: avoid;
+}
+h2 {
+  font-size: 1.3rem;
+  margin-top: 1.4rem;
+  color: #222;
+}
+h3 {
+  font-size: 1.1rem;
+  margin-top: 1.2rem;
+  color: #333;
+}
+
+p, li {
+  orphans: 3;
+  widows: 3;
+}
+
+blockquote {
+  border-left: 3px solid #bbb;
+  margin: 1rem 0;
+  padding: 0.2rem 1rem;
+  color: #555;
+  background: #f7f7f7;
+}
+
+/* Inline code */
+code {
+  font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: #f0f0f0;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* Code blocks: never split a block across pages */
+pre {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  page-break-inside: avoid;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+th {
+  background: #f0f0f0;
+}
+
+/* Explicit page break marker between lessons (we also use
+   page-break-before on h1, so this is belt-and-suspenders). */
+.page-break {
+  page-break-after: always;
+}
